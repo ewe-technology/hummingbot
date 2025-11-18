@@ -1,6 +1,5 @@
 # scripts/hyperliquid_candles_balance_positions.py
 from typing import Dict, Set
-from decimal import Decimal
 from hummingbot.strategy.script_strategy_base import ScriptStrategyBase
 from hummingbot.data_feed.candles_feed.candles_factory import CandlesFactory, CandlesConfig
 import pandas as pd
@@ -30,61 +29,76 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
         # debugpy.listen(("0.0.0.0", 5678))
         # debugpy.wait_for_client()
 
-        self.candles.start()
-        self._last_log_ts = 0
-        self._log_interval = 5  # 每 5 秒運行一次
+        # 狀態旗標：用來在 on_stop 後阻止後續 on_tick 邏輯
+        self._stopped = False
+
+        # log 用 timestamp
+        self._last_log_ts = 0          # 主邏輯（每 _log_interval 秒執行一次）
+        self._connector_log_ts = 0     # 等待 connector 用的 log 間隔
+        self._log_interval = 5         # 每 5 秒運行一次
         self._connector_ready_logged = False
         self._ready_wait_count = 0
+
+        # 啟動 candles feed
+        self.candles.start()
 
     def on_tick(self):
         """
         每 tick_size 秒（預設 1 秒）會被呼叫一次。
+        一定要保持「非阻塞」並且快速 return，這樣 CLI 的 stop 才能正常生效。
         """
+        # 若已經進入停止流程，就不再做任何事情
+        if self._stopped:
+            return
+
         now = self.current_timestamp
 
         # 檢查 connector 是否存在
         perp_connector = self.connectors.get("hyperliquid_perpetual")
 
         if perp_connector is None:
-            if now - self._last_log_ts >= 5:
+            # 使用獨立的 _connector_log_ts 來控制這裡的 log 頻率
+            if now - self._connector_log_ts >= 5:
                 self.logger().warning("⚠️ hyperliquid_perpetual connector 不存在")
                 self.logger().info(f"可用的 connectors: {list(self.connectors.keys())}")
                 self.logger().info("請確認：")
                 self.logger().info("  1. Gateway 是否在運行中")
                 self.logger().info("  2. Hyperliquid API 是否已配置")
                 self.logger().info("  3. 使用 'gateway connect hyperliquid_perpetual' 連接")
-                self._last_log_ts = now
+                self._connector_log_ts = now
             return
 
         # 檢查 connector 是否就緒
         if not perp_connector.ready:
-            if now - self._last_log_ts >= 5:
+            if now - self._connector_log_ts >= 5:
                 self._ready_wait_count += 1
                 self.logger().info(f"⏳ 等待 connector 就緒... (已等待 {self._ready_wait_count * 5} 秒)")
                 self.logger().info(f"   Connector 類型: {type(perp_connector).__name__}")
-                self._last_log_ts = now
+                self._connector_log_ts = now
             return
 
-        # Connector 就緒
+        # Connector 第一次就緒時，只 log 一次
         if not self._connector_ready_logged:
             self.logger().info("=" * 80)
             self.logger().info("✅ hyperliquid_perpetual connector 已就緒！")
             self.logger().info("=" * 80)
             self._connector_ready_logged = True
 
-        # 每隔指定時間執行一次
-        if now - self._last_log_ts >= self._log_interval:
-            self.logger().info("=" * 80)
-            self.logger().info(f"📊 策略運行 Tick - {pd.Timestamp.now()}")
-            self.logger().info("=" * 80)
+        # 每隔指定時間執行一次主邏輯
+        if now - self._last_log_ts < self._log_interval:
+            return
 
-            self._log_candle()
-            self._log_account_balance()
-            self._log_account_positions()
-            self._log_open_orders()
-            self._log_market_price()
+        self.logger().info("=" * 80)
+        self.logger().info(f"📊 策略運行 Tick - {pd.Timestamp.now()}")
+        self.logger().info("=" * 80)
 
-            self._last_log_ts = now
+        self._log_candle()
+        self._log_account_balance()
+        self._log_account_positions()
+        self._log_open_orders()
+        self._log_market_price()
+
+        self._last_log_ts = now
 
     # ========= 1. K 線資訊 =========
     def _log_candle(self):
@@ -96,8 +110,8 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
                 self.logger().info("📈 [K線] 尚未取得資料")
                 return
 
+            df = df.copy()
             if "timestamp" in df.columns:
-                df = df.copy()
                 df["ts_readable"] = pd.to_datetime(df["timestamp"], unit="ms")
 
             last = df.iloc[-1]
@@ -141,7 +155,7 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
                 self.logger().info("  • 無餘額資料")
 
         except Exception as e:
-            self.logger().error(f"  ❌ 錯誤: {e}")
+            self.logger().error(f"  ❌ [帳戶餘額] 錯誤: {e}")
 
     # ========= 3. 當前倉位 =========
     def _log_account_positions(self):
@@ -182,7 +196,7 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
                         self.logger().info(f"  • {trading_pair}: {position}")
 
         except Exception as e:
-            self.logger().error(f"  ❌ 錯誤: {e}")
+            self.logger().error(f"  ❌ [當前持倉] 錯誤: {e}")
 
     # ========= 4. 當前掛單 =========
     def _log_open_orders(self):
@@ -220,7 +234,7 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
                         self.logger().info(f"  • {order}")
 
         except Exception as e:
-            self.logger().error(f"  ❌ 錯誤: {e}")
+            self.logger().error(f"  ❌ [當前掛單] 錯誤: {e}")
 
     # ========= 5. 市場價格 =========
     def _log_market_price(self):
@@ -256,36 +270,53 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
             if hasattr(perp_connector, "get_price"):
                 try:
                     last_price = perp_connector.get_price(trading_pair)
-                except:
+                except Exception:
                     pass
 
-            if not last_price and hasattr(perp_connector, "get_mid_price"):
+            if last_price is None and hasattr(perp_connector, "get_mid_price"):
                 try:
                     last_price = perp_connector.get_mid_price(trading_pair)
-                except:
+                except Exception:
                     pass
 
             # 顯示結果
-            if best_bid:
+            if best_bid is not None:
                 self.logger().info(f"  • 買一價: ${best_bid:,.2f}")
-            if best_ask:
+            if best_ask is not None:
                 self.logger().info(f"  • 賣一價: ${best_ask:,.2f}")
-            if last_price:
+            if last_price is not None:
                 self.logger().info(f"  • 最新價: ${last_price:,.2f}")
 
-            if best_bid and best_ask:
+            if best_bid is not None and best_ask is not None:
                 spread = best_ask - best_bid
                 spread_pct = (spread / best_bid) * 100
                 self.logger().info(f"  • 價差: ${spread:.2f} ({spread_pct:.4f}%)")
 
-            if not any([best_bid, best_ask, last_price]):
+            if all(v is None for v in [best_bid, best_ask, last_price]):
                 self.logger().info("  • 無法獲取價格資料")
 
         except Exception as e:
-            self.logger().error(f"  ❌ 錯誤: {e}")
+            self.logger().error(f"  ❌ [市場價格] 錯誤: {e}")
 
-    def on_stop(self):
-        """策略停止時的清理工作"""
-        if self.candles:
-            self.candles.stop()
-        self.logger().info("✋ 策略已停止")
+    # ========= 停止流程 =========
+    async def on_stop(self):
+        """
+        策略停止時的清理工作。
+        注意：在 HBOT v2 中，這個函數會被 `await on_stop()`，
+        所以必須是 async def，不能是同步函數，否則會出現
+        "object NoneType can't be used in 'await' expression"。
+        """
+        # 標記已停止，阻止後續 on_tick 邏輯
+        self._stopped = True
+
+        try:
+            if self.candles:
+                # candles.stop() 可能是同步也可能是 coroutine，這裡做防守式處理
+                stop_result = self.candles.stop()
+                # 如果回傳的是 coroutine，就 await 一下
+                if hasattr(stop_result, "__await__"):
+                    await stop_result
+        except Exception as e:
+            self.logger().warning(f"停止 candles 時發生錯誤: {e}")
+
+        self.logger().info("✋ 策略已停止（on_stop 已呼叫）")
