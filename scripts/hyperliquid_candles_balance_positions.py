@@ -11,6 +11,7 @@ from typing import Dict, Set
 from hummingbot.strategy.script_strategy_base import ScriptStrategyBase
 from hummingbot.data_feed.candles_feed.candles_factory import CandlesFactory, CandlesConfig
 import pandas as pd
+from lib.time.timestamp_to_taipei_datetime import timestamp_to_taipei_datetime
 
 
 class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
@@ -36,8 +37,8 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
         import debugpy
 
         debugpy.listen(("0.0.0.0", 5678))
-        self.logger().info("🐞 Debugger waiting... Attach with PyCharm.")
-        # 這行會讓 HBOT 停在這裡，直到 PyCharm attach
+        self.logger().info("🐞 Debugger waiting... Attach with VSCode.")
+        # 這行會讓 HBOT 停在這裡，直到 VSCode attach
         debugpy.wait_for_client()
 
         # 狀態旗標：用來在 on_stop 後阻止後續 on_tick 邏輯
@@ -123,7 +124,7 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
 
             df = df.copy()
             if "timestamp" in df.columns:
-                df["ts_readable"] = pd.to_datetime(df["timestamp"], unit="ms")
+                df["ts_readable"] = timestamp_to_taipei_datetime(df["timestamp"])
 
             last = df.iloc[-1]
             self.logger().info(

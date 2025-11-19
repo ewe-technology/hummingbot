@@ -30,9 +30,20 @@
 4. 實際 Debug 流程（以 Windows + cmd 為例）
    1. 在開 Hummingbot 前設環境變數
    2. cmd `set HBOT_DEBUGPY=1`
-   3. 啟動 hummingbot `python bin\hummingbot.py`
-   4. 進入 Hummingbot CLI 後： `start --script hyperliquid_candles_balance_positions.py`
-   5. 此時 script 會跑到 debugpy.wait_for_client() 就停住，log 會看到： `🐞 debugpy 等待連線 port 5678 ...`
+   3. 實測上需要這段
+      ```
+        # # 如果要 debugpy，在這裡放
+        # import debugpy
+
+        # debugpy.listen(("0.0.0.0", 5678))
+        # self.logger().info("🐞 Debugger waiting... Attach with VSCode.")
+        # # 這行會讓 HBOT 停在這裡，直到 VSCode attach
+        # debugpy.wait_for_client()
+      ```
+      但是如果不註解掉的話會沒辦法正確stop，要註解這段才能重新啟動
+   4. 啟動 hummingbot `python bin\hummingbot.py`
+   5. 進入 Hummingbot CLI 後： `start --script hyperliquid_candles_balance_positions.py`
+   6. 此時 script 會跑到 debugpy.wait_for_client() 就停住，log 會看到： `🐞 debugpy 等待連線 port 5678 ...`
 5. 在 VSCode Attach
    1. 打開 VSCode（已開你的專案）
    2. 左邊 Debug panel 選擇 「Attach to Hummingbot (debugpy）」
