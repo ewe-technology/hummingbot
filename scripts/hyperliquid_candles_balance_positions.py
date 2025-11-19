@@ -1,3 +1,11 @@
+"""
+repo上的sample script都沒辦法正確運行，這是調試很久後，根據最新的repo結構組出來可以運行的Script  可以拿最新行情資訊和帳戶內餘額資訊、倉位資訊等
+但是要進debug模式有遇到障礙，因為有 hummingbot cli的關係，pycharm community版是確定不行了，正在嘗試vsCode有沒有辦法進 attach remote debug mode
+
+實測可以使用vs code attatch remote debug mode來進行debug
+"""
+
+
 # scripts/hyperliquid_candles_balance_positions.py
 from typing import Dict, Set
 from hummingbot.strategy.script_strategy_base import ScriptStrategyBase
@@ -25,9 +33,12 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
         super().__init__(*args, **kwargs)
 
         # 如果要 debugpy，在這裡放
-        # import debugpy
-        # debugpy.listen(("0.0.0.0", 5678))
-        # debugpy.wait_for_client()
+        import debugpy
+
+        debugpy.listen(("0.0.0.0", 5678))
+        self.logger().info("🐞 Debugger waiting... Attach with PyCharm.")
+        # 這行會讓 HBOT 停在這裡，直到 PyCharm attach
+        debugpy.wait_for_client()
 
         # 狀態旗標：用來在 on_stop 後阻止後續 on_tick 邏輯
         self._stopped = False
