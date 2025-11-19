@@ -124,7 +124,7 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
 
             df = df.copy()
             if "timestamp" in df.columns:
-                df["ts_readable"] = timestamp_to_taipei_datetime(df["timestamp"])
+                df["ts_readable"] = df["timestamp"].apply(timestamp_to_taipei_datetime)
 
             last = df.iloc[-1]
             self.logger().info(
@@ -270,10 +270,22 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
                     order_book = perp_connector.get_order_book(trading_pair)
                     if order_book and hasattr(order_book, "snapshot"):
                         bids, asks = order_book.snapshot
-                        if len(bids) > 0:
-                            best_bid = float(bids[0][0])
-                        if len(asks) > 0:
-                            best_ask = float(asks[0][0])
+                        
+                        # DataFrame 格式處理
+                        if bids is not None and not bids.empty:
+                            # 假設價格在 'price' 欄位,或第一個欄位
+                            if 'price' in bids.columns:
+                                best_bid = float(bids.iloc[0]['price'])
+                            else:
+                                best_bid = float(bids.iloc[0, 0])
+                        
+                        if asks is not None and not asks.empty:
+                            # 假設價格在 'price' 欄位,或第一個欄位
+                            if 'price' in asks.columns:
+                                best_ask = float(asks.iloc[0]['price'])
+                            else:
+                                best_ask = float(asks.iloc[0, 0])
+                                
                 except Exception as e:
                     self.logger().debug(f"訂單簿獲取失敗: {e}")
 
