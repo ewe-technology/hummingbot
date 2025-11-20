@@ -7,7 +7,8 @@
 3. (若第一次建立clone完需建立虛擬環境) `python -m venv venv`
 4. 啟動虛擬環境 (windows) `.\venv\Scripts\Activate.ps1`
 5. 用symblink editable模式安裝依賴(這樣才可以即改即應用，不用重新安裝一次依賴) `pip install -e .`
-6. 執行你的策略進行測`python ak-code\hello-world-hyperliquid.py`
+6. 安裝我們需要的額外依賴(debug模式) `pip install -r requirements.txt`
+7. 執行你的策略進行測`python ak-code\hello-world-hyperliquid.py`
 
 
 # 錯誤處理: 函式庫安裝失敗
