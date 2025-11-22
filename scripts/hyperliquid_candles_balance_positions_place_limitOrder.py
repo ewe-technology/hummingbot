@@ -38,13 +38,13 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # # 如果要 debugpy，在這裡放
-        # import debugpy
+        # 如果要 debugpy，在這裡放
+        import debugpy
 
-        # debugpy.listen(("0.0.0.0", 5678))
-        # self.logger().info("🐞 Debugger waiting... Attach with VSCode.")
-        # # 這行會讓 HBOT 停在這裡，直到 VSCode attach
-        # debugpy.wait_for_client()
+        debugpy.listen(("0.0.0.0", 5678))
+        self.logger().info("🐞 Debugger waiting... Attach with VSCode.")
+        # 這行會讓 HBOT 停在這裡，直到 VSCode attach
+        debugpy.wait_for_client()
 
         # 狀態旗標：用來在 on_stop 後阻止後續 on_tick 邏輯
         self._stopped = False
@@ -338,7 +338,7 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
         except Exception as e:
             self.logger().error(f"  ❌ [市場價格] 錯誤: {e}")
 
-    # ========= 6. 掛單（下單範例） =========
+    # ========= 6. 掛單  =========
     def _place_demo_orders(self):
         """
         掛一組簡單的 BUY / SELL 限價單做示範：

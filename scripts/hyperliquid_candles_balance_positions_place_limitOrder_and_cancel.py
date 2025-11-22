@@ -6,15 +6,16 @@ repo上的sample script都沒辦法正確運行，這是調試很久後，根據
 """
 
 
-# scripts/hyperliquid_candles_balance_positions.py
-from typing import Dict, Set
 from decimal import Decimal
 
-from hummingbot.strategy.script_strategy_base import ScriptStrategyBase
-from hummingbot.data_feed.candles_feed.candles_factory import CandlesFactory, CandlesConfig
-from hummingbot.core.data_type.common import OrderType, PositionAction
+# scripts/hyperliquid_candles_balance_positions.py
+from typing import Dict, Set
 
 import pandas as pd
+
+from hummingbot.core.data_type.common import OrderType, PositionAction
+from hummingbot.data_feed.candles_feed.candles_factory import CandlesConfig, CandlesFactory
+from hummingbot.strategy.script_strategy_base import ScriptStrategyBase
 from lib.time.timestamp_to_taipei_datetime import timestamp_to_taipei_datetime
 
 
@@ -37,13 +38,13 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # 如果要 debugpy，在這裡放
-        import debugpy
+        # # 如果要 debugpy，在這裡放
+        # import debugpy
 
-        debugpy.listen(("0.0.0.0", 5678))
-        self.logger().info("🐞 Debugger waiting... Attach with VSCode.")
-        # 這行會讓 HBOT 停在這裡，直到 VSCode attach
-        debugpy.wait_for_client()
+        # debugpy.listen(("0.0.0.0", 5678))
+        # self.logger().info("🐞 Debugger waiting... Attach with VSCode.")
+        # # 這行會讓 HBOT 停在這裡，直到 VSCode attach
+        # debugpy.wait_for_client()
 
         # 狀態旗標：用來在 on_stop 後阻止後續 on_tick 邏輯
         self._stopped = False
@@ -121,6 +122,9 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
         # if not self._order_placed:
         #     self._place_demo_orders()
         #     self._order_placed = True
+
+        # 測試用 持續取消訂單
+        self._cancel_all_open_orders()
 
         # 測試用 持續掛單
         self._place_demo_orders()
@@ -285,7 +289,7 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
                     order_book = perp_connector.get_order_book(trading_pair)
                     if order_book and hasattr(order_book, "snapshot"):
                         bids, asks = order_book.snapshot
-                        
+
                         # DataFrame 格式處理
                         if bids is not None and not bids.empty:
                             # 假設價格在 'price' 欄位,或第一個欄位
@@ -293,14 +297,14 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
                                 best_bid = float(bids.iloc[0]['price'])
                             else:
                                 best_bid = float(bids.iloc[0, 0])
-                        
+
                         if asks is not None and not asks.empty:
                             # 假設價格在 'price' 欄位,或第一個欄位
                             if 'price' in asks.columns:
                                 best_ask = float(asks.iloc[0]['price'])
                             else:
                                 best_ask = float(asks.iloc[0, 0])
-                                
+
                 except Exception as e:
                     self.logger().debug(f"訂單簿獲取失敗: {e}")
 
@@ -337,7 +341,7 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
         except Exception as e:
             self.logger().error(f"  ❌ [市場價格] 錯誤: {e}")
 
-    # ========= 6. 掛單（下單範例） =========
+    # ========= 6. 掛單 =========
     def _place_demo_orders(self):
         """
         掛一組簡單的 BUY / SELL 限價單做示範：
@@ -405,7 +409,27 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
         except Exception as e:
             self.logger().error(f"❌ SELL 掛單失敗: {e}")
 
-    
+    # ========= 7. 取消掛單  ==========
+    def _cancel_all_open_orders(self):
+        """示範：取消目前所有 hyperliquid_perpetual 的掛單"""
+        perp_connector = self.connectors.get("hyperliquid_perpetual")
+        if perp_connector is None or not perp_connector.ready:
+            return
+
+        orders = perp_connector.in_flight_orders if hasattr(perp_connector, "in_flight_orders") else None
+        if not orders:
+            self.logger().info("🧹 沒有掛單可以取消")
+            return
+
+        self.logger().info("🧹 開始取消所有掛單...")
+        trading_pair = "BTC-USD"
+        for order in orders:
+            try:
+                self.cancel("hyperliquid_perpetual", trading_pair, order)
+                self.logger().info(f"  ⭕ 已送出取消：{order.client_order_id}")
+            except Exception as e:
+                self.logger().error(f"  ❌ 取消失敗 {order.client_order_id}: {e}")
+
     # ========= 停止流程 =========
     async def on_stop(self):
         """
