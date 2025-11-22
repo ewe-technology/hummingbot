@@ -1,8 +1,10 @@
 import requests
+
 from hummingbot.connector.derivative.hyperliquid_perpetual.hyperliquid_perpetual_constants import (
-    PERPETUAL_BASE_URL,
     META_INFO,
+    PERPETUAL_BASE_URL,
 )
+
 
 def fetch_pairs():
     url = PERPETUAL_BASE_URL + "/info"
@@ -25,6 +27,7 @@ def fetch_pairs():
         # 這裡的欄位名稱要照實際回傳為準
         # 常見的結構裡會有像 name / index / szDecimals 等
         print(asset)
+
 
 if __name__ == "__main__":
     fetch_pairs()

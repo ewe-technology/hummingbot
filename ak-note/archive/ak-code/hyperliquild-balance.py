@@ -5,17 +5,18 @@
 
 
 import asyncio
+import inspect
 import logging
 import os
-from dotenv import load_dotenv
-import inspect
 
-from hummingbot.data_feed.candles_feed.candles_factory import CandlesFactory, CandlesConfig
+from dotenv import load_dotenv
+
+from hummingbot.client.config.client_config_map import ClientConfigMap
+from hummingbot.client.config.config_helpers import ClientConfigAdapter
 
 # ★ 這兩個 import 是重點：拉進 Hyperliquid 現貨 connector ＋ config_map
 from hummingbot.connector.exchange.hyperliquid.hyperliquid_exchange import HyperliquidExchange
-from hummingbot.client.config.client_config_map import ClientConfigMap
-from hummingbot.client.config.config_helpers import ClientConfigAdapter
+from hummingbot.data_feed.candles_feed.candles_factory import CandlesConfig, CandlesFactory
 
 logging.basicConfig(
     level=logging.INFO,

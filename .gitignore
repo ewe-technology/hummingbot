@@ -64,7 +64,7 @@ debug.log
 
 
 # VSCode
-.vscode/
+# .vscode/ # for debug json files
 .history/
 
 # emacs files

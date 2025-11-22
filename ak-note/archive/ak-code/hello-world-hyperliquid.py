@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from hummingbot.data_feed.candles_feed.candles_factory import CandlesFactory, CandlesConfig
+from hummingbot.data_feed.candles_feed.candles_factory import CandlesConfig, CandlesFactory
 
 logging.basicConfig(
     level=logging.INFO,

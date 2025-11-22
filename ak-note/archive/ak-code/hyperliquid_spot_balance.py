@@ -4,15 +4,15 @@
 """
 
 import asyncio
+import inspect
 import logging
 import os
-import inspect
 
 from dotenv import load_dotenv
 
-from hummingbot.connector.exchange.hyperliquid.hyperliquid_exchange import HyperliquidExchange
 from hummingbot.client.config.client_config_map import ClientConfigMap
 from hummingbot.client.config.config_helpers import ClientConfigAdapter
+from hummingbot.connector.exchange.hyperliquid.hyperliquid_exchange import HyperliquidExchange
 
 logging.basicConfig(
     level=logging.INFO,
