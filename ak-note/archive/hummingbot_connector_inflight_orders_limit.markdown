@@ -1,16 +1,16 @@
 
 # **Hummingbot Connector In-Flight Orders 限制說明**
-版本：v1.0  
-作者：AK（依 ChatGPT 解說整理）  
+版本：v1.0
+作者：AK（依 ChatGPT 解說整理）
 日期：2025-11-19
 
 ---
 
 ## 📌 **結論（最重要）**
 
-### **❌ Hummingbot 無法取得「交易所帳號下的所有 open orders」**  
-### **❌ Connector 也不會自動同步交易所所有 open orders**  
-### **❌ Hummingbot 沒有任何變數可存放帳號全部 open orders**  
+### **❌ Hummingbot 無法取得「交易所帳號下的所有 open orders」**
+### **❌ Connector 也不會自動同步交易所所有 open orders**
+### **❌ Hummingbot 沒有任何變數可存放帳號全部 open orders**
 
 ### **✔ Hummingbot 只能追蹤「它自己送出的訂單」 → in_flight_orders**
 
@@ -22,13 +22,13 @@
 
 根據 Hummingbot 官方 connector 架構：
 
-> **InFlightOrder = 由 Hummingbot 自己送出、並由訂單追蹤器管理的訂單。**  
+> **InFlightOrder = 由 Hummingbot 自己送出、並由訂單追蹤器管理的訂單。**
 > （不是帳號下所有訂單）
 
 意義上：
 
-- InFlightOrders 代表 Hummingbot 所下的、正在交易所中進行生命週期追蹤的訂單  
-- Hummingbot 不會主動同步帳號所有 open orders  
+- InFlightOrders 代表 Hummingbot 所下的、正在交易所中進行生命週期追蹤的訂單
+- Hummingbot 不會主動同步帳號所有 open orders
 - 交易所手動下單、其他 bot 下單等都不會被 Hummingbot 追蹤
 
 ---
@@ -43,14 +43,14 @@
 | `order_tracker` | 保存 InFlightOrders | ❌ |
 | `get_order_status()` | 查某個 orderId 的狀態 | ❌（需要 ID，不能列全部） |
 
-➡ **這些 API 都只認識 Hummingbot 自己送出的 order**  
+➡ **這些 API 都只認識 Hummingbot 自己送出的 order**
 ➡ **所有「外部來源的訂單」都不會出現在任何變數裡**
 
 包含：
 
-- 網頁 UI 下的單  
-- 手機 App 下的單  
-- 其他 bot 下的單  
+- 網頁 UI 下的單
+- 手機 App 下的單
+- 其他 bot 下的單
 - 甚至是同一個帳號、但在以前 session 下的單（除非 HBOT 當時有追蹤）
 
 ---
@@ -62,8 +62,8 @@
 ### **1. 性能與延遲**
 查詢 openOrders API 在很多交易所：
 
-- 速率限制高  
-- latency 大  
+- 速率限制高
+- latency 大
 - 開銷重
 
 Hummingbot 重視 **低延遲、即時做市**，所以不依賴這種高頻查詢。
@@ -73,9 +73,9 @@ Hummingbot 重視 **低延遲、即時做市**，所以不依賴這種高頻查�
 ### **2. 避免混淆 order lifecycle**
 如果帳號有手動單 + bot 單，會出現：
 
-- orderId 不一致  
-- 無法追蹤下單來源  
-- 同步衝突  
+- orderId 不一致
+- 無法追蹤下單來源
+- 同步衝突
 - race condition（交易所回報 vs bot local state）
 
 所以 Hummingbot 只追蹤「自己知道的訂單」。
@@ -137,18 +137,18 @@ async def fetch_hl_open_orders(self):
 
 合併後你可以做：
 
-- 真正意義上的「全帳號訂單監控」  
-- 偵測是否有外部來源的單  
-- 自動對帳（例如發現 ghost order）  
+- 真正意義上的「全帳號訂單監控」
+- 偵測是否有外部來源的單
+- 自動對帳（例如發現 ghost order）
 - 自動清理非 HBOT 單的風控動作
 
 ---
 
 # 6️⃣ 小結：你只需要記住這幾點
 
-### ❌ Hummingbot connector 不會同步帳號 open orders  
-### ❌ Hummingbot 沒有任何變數保存帳號 open orders  
-### ❗ 你看到的 `in_flight_orders` 只代表 **Hummingbot 自己送出的訂單**  
+### ❌ Hummingbot connector 不會同步帳號 open orders
+### ❌ Hummingbot 沒有任何變數保存帳號 open orders
+### ❗ 你看到的 `in_flight_orders` 只代表 **Hummingbot 自己送出的訂單**
 ### ⭐ 想要全部 open orders → 自己打交易所 API
 
 ---

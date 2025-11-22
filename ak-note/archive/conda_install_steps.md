@@ -4,7 +4,7 @@
 
 ### 方案一:安裝 Conda(推薦)
 
-Hummingbot 的安裝腳本需要 Conda 來管理 Python 環境。 [1](#5-0) 安裝腳本會檢查 Conda 是否存在,如果不存在會提示您安裝。 [2](#5-1) 
+Hummingbot 的安裝腳本需要 Conda 來管理 Python 環境。 [1](#5-0) 安裝腳本會檢查 Conda 是否存在,如果不存在會提示您安裝。 [2](#5-1)
 
 **安裝 Miniconda(較輕量)**:
 1. 前往 https://docs.conda.io/en/latest/    miniconda.html
@@ -63,9 +63,9 @@ docker attach hummingbot
 ## 推薦做法
 
 **強烈建議安裝 Conda**,因為:<cite/>
-1. Hummingbot 的官方安裝流程完全基於 Conda [4](#5-3) 
-2. CI/CD 流程也使用 Conda [5](#5-4) 
-3. 環境配置檔案 `setup/environment.yml` 是為 Conda 設計的 [6](#5-5) 
+1. Hummingbot 的官方安裝流程完全基於 Conda [4](#5-3)
+2. CI/CD 流程也使用 Conda [5](#5-4)
+3. 環境配置檔案 `setup/environment.yml` 是為 Conda 設計的 [6](#5-5)
 4. 避免依賴版本衝突和相容性問題
 
 ## Notes

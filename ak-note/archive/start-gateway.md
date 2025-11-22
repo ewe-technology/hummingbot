@@ -4,4 +4,4 @@
 3. 使用原本default的 strategy(pure_market_making) 去測，在local跑的會失敗 (簽名一樣會亂簽) ![alt text](<2025-11-21 11_46_40-Window.png>)
 4. 用乾淨的ubuntu環境去跑 default的 strategy(pure_market_making) 可以work 所以我推測可能是在哪一邊改到不可以改的東西了之類的  -> 先再弄一個全新的環境去跑跑看，交叉比對一下
 5. 改用conda來準備開發環境
-6. 
+6.

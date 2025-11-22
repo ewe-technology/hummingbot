@@ -1,5 +1,5 @@
 # Windows 要進本地開發模式方式
-1. 安裝 C++ 套件: 
+1. 安裝 C++ 套件:
    1. https://visualstudio.microsoft.com/visual-cpp-build-tools/
    2. 勾選 Desktop development with C++（使用 C++ 的桌面開發）」 這個 workload 其他保持default
    3. 安裝好後重新啟動一個terminal

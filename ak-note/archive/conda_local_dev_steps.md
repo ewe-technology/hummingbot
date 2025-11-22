@@ -17,7 +17,7 @@ conda activate hummingbot
 
 # 安裝依賴
 pip install -r setup/pip_packages.txt
-``` [1](#4-0) 
+``` [1](#4-0)
 
 #### 2. 啟動 Gateway(如果需要 DEX 交易)
 
@@ -27,7 +27,7 @@ pip install -r setup/pip_packages.txt
 ```bash
 # 在 docker-compose.yml 中取消註解 gateway 服務
 docker compose up -d gateway
-``` [2](#4-1) 
+``` [2](#4-1)
 
 **選項 B: 從源碼運行 Gateway**
 ```bash
@@ -38,7 +38,7 @@ cd gateway
 # 安裝並啟動
 yarn install
 yarn start
-``` [3](#4-2) 
+``` [3](#4-2)
 
 #### 3. 配置 Gateway 連接(如果使用)
 
@@ -48,7 +48,7 @@ gateway:
   gateway_api_host: localhost
   gateway_api_port: 15888
   gateway_use_ssl: false  # 開發模式使用 HTTP
-``` [4](#4-3) 
+``` [4](#4-3)
 
 #### 4. 創建您的 Script
 
@@ -59,7 +59,7 @@ from hummingbot.strategy.script_strategy_base import ScriptStrategyBase
 class MyStrategy(ScriptStrategyBase):
     # 您的策略邏輯
     pass
-``` [5](#4-4) 
+``` [5](#4-4)
 
 #### 5. 啟動 Hummingbot 並運行 Script
 
@@ -69,7 +69,7 @@ class MyStrategy(ScriptStrategyBase):
 
 # 在 Hummingbot CLI 中
 >>> start --script my_strategy.py
-``` [6](#4-5) 
+``` [6](#4-5)
 
 #### 6. 開發迭代流程
 
@@ -97,18 +97,18 @@ conda activate hummingbot
 
 ## 開發工具配置(可選)
 
-如果使用 VS Code 或 Cursor IDE,可以配置調試環境: [7](#4-6) 
+如果使用 VS Code 或 Cursor IDE,可以配置調試環境: [7](#4-6)
 
-創建 `.vscode/launch.json`: [8](#4-7) 
+創建 `.vscode/launch.json`: [8](#4-7)
 
 ## Notes
 
 **關鍵點**:
-- Script 文件存放在 `scripts/` 目錄 [9](#4-8) 
+- Script 文件存放在 `scripts/` 目錄 [9](#4-8)
 - 如果只使用 CEX(中心化交易所),不需要 Gateway<cite/>
 - Gateway 只在使用 DEX 連接器時需要<cite/>
 - 從源碼運行比使用 Docker 更適合開發,因為可以直接修改代碼並快速測試<cite/>
-- Script 配置文件(可選)存放在 `conf/scripts/` 目錄 [10](#4-9) 
+- Script 配置文件(可選)存放在 `conf/scripts/` 目錄 [10](#4-9)
 
 Wiki pages you might want to explore:
 - [Overview (hummingbot/hummingbot)](/wiki/hummingbot/hummingbot#1)
@@ -214,5 +214,3 @@ SCRIPT_STRATEGY_CONF_DIR_PATH = CONF_DIR_PATH / "scripts"
 SCRIPT_STRATEGIES_MODULE = "scripts"
 SCRIPT_STRATEGIES_PATH = root_path() / SCRIPT_STRATEGIES_MODULE
 ```
-
-
