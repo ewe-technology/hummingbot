@@ -14,9 +14,9 @@
 
 # debug mode on Ubuntu
 1. Click the button in the bottom left corner of VScode. Looks like ><
-2. Click Extension buttom on the left
-3. Install python
-4. Choose connect to WSL
+2. Choose connect to WSL
+3. Click Extension buttom on the left
+4. Install python
 5. Click the Run and Debug buttom on the left (looks like a bug)
 6. add configuration
 ```json
