@@ -61,7 +61,7 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
         # 建倉次數
         self._order_placed = 0
 
-        # 建倉目標次數
+        # 關倉目標次數
         self._target_building_times = 2
 
         # 啟動 candles feed
