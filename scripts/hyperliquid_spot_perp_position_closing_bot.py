@@ -1,14 +1,4 @@
-"""
-repo上的sample script都沒辦法正確運行，這是調試很久後，根據最新的repo結構組出來可以運行的Script  可以拿最新行情資訊和帳戶內餘額資訊、倉位資訊等
-但是要進debug模式有遇到障礙，因為有 hummingbot cli的關係，pycharm community版是確定不行了，正在嘗試vsCode有沒有辦法進 attach remote debug mode
-
-實測可以使用vs code attatch remote debug mode來進行debug
-"""
-
-
 from decimal import Decimal
-
-# scripts/hyperliquid_candles_balance_positions.py
 from typing import Dict, Set
 
 import pandas as pd
