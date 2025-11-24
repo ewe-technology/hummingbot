@@ -3,7 +3,7 @@
 2. Install/Update System Packages `sudo apt update && sudo apt upgrade -y && sudo apt install -y gcc build-essential`
 3. Install Anaconda
 4. `curl -O https://repo.anaconda.com/archive/Anaconda3-2025.06-0-Linux-x86_64.sh`
-5. `bash ./Anaconda3-2025.06-0-Linux-x86_64.sh`
+5. `bash ./Anaconda3-2025.06-0-Linux-x86_64.sh` Do you wish to update your shell profile to automatically initialize conda? -> choose yes and restart terminal
 6. Clone the repository `git clone git@github.com:ewe-technology/hummingbot.git -b ak`
 7. `cd hummingbot`
 8. Install the environment and dependencies `./install`
