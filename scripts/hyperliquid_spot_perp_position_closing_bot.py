@@ -40,13 +40,13 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # 如果要 debugpy，在這裡放
-        import debugpy
+        # # 如果要 debugpy，在這裡放
+        # import debugpy
 
-        debugpy.listen(("0.0.0.0", 5678))
-        self.logger().info("🐞 Debugger waiting... Attach with VSCode.")
-        # 這行會讓 HBOT 停在這裡，直到 VSCode attach
-        debugpy.wait_for_client()
+        # debugpy.listen(("0.0.0.0", 5678))
+        # self.logger().info("🐞 Debugger waiting... Attach with VSCode.")
+        # # 這行會讓 HBOT 停在這裡，直到 VSCode attach
+        # debugpy.wait_for_client()
 
         # 狀態旗標：用來在 on_stop 後阻止後續 on_tick 邏輯
         self._stopped = False
@@ -134,7 +134,7 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
         self._log_market_price()
 
         # -------------------------------
-        # 建倉 N 次後自動停止
+        # 平倉 N 次後自動停止
         # -------------------------------
         if self._order_placed < self._target_building_times:
             self._place_demo_orders()
@@ -356,7 +356,7 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
         except Exception as e:
             self.logger().error(f"  ❌ [市場價格] 錯誤: {e}")
 
-    # ========= 6. 市價期現建倉  =========
+    # ========= 6. 市價期現減倉  =========
     def _place_demo_orders(self):
         """
         掛一組簡單的 BUY / SELL 限價單做示範：
@@ -398,13 +398,13 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
 
         # ▶ 下市價 BUY 單
         try:
-            buy_order_id = self.buy(
+            buy_order_id = self.sell(
                 connector_name="hyperliquid",
                 trading_pair=trading_pair_spot,
                 amount=order_amount,
                 order_type=OrderType.MARKET,
                 price=mid_price,
-                position_action=PositionAction.OPEN,  # 購入現貨
+                position_action=PositionAction.CLOSE,  # 購入現貨
             )
             self.logger().info(f"✅ SPOT BUY 掛單完成，order_id = {buy_order_id}")
         except Exception as e:
@@ -412,13 +412,13 @@ class HyperliquidCandlesBalancePositions(ScriptStrategyBase):
 
         # ▶ 下 SELL 單
         try:
-            sell_order_id = self.sell(
+            sell_order_id = self.buy(
                 connector_name="hyperliquid_perpetual",
                 trading_pair=trading_pair_perp,
                 amount=order_amount,
                 order_type=OrderType.MARKET,
                 price=mid_price,
-                position_action=PositionAction.OPEN,  # 永續合約開倉
+                position_action=PositionAction.CLOSE,  # 永續合約開倉
             )
             self.logger().info(f"✅ PERP SELL 掛單完成，order_id = {sell_order_id}")
         except Exception as e:
